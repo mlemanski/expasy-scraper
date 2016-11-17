@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# 
+# Given a protein value, just extract its number of cleavages from expasy.org's peptide cutter
+#
+
+tgt_protein=$1
+
+echo $(curl -s -X POST -d "protein=$1&enzyme_number=less_enzymes&enzyme=Tryps&special_enzyme=Chym&min_prob=&block_size=60&alphtable=alphtable&cleave_number=all&cleave_exactly=&cleave_range_min=&cleave_range_max=" -L http://web.expasy.org/cgi-bin/peptide_cutter/peptidecutter.pl | grep "/peptide_cutter/peptidecutter_enzymes\.html#Tryps" | awk -F '<td align=center>|</td>' '{print $3}')

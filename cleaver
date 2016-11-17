@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#
+# cleaver
+#
+# This script reads a file of protein values (one per line) and outputs a CSV
+# of protein and number of cleavages mappings.
+#
+# If no file is provided, use input.txt
+# Output to output.csv
+# 
+#
+
+input_file=input.txt
+output_file=output.csv
+
+# if an extra argument is passed to this script, treat it as the input file
+if [ $# -eq 2 ]
+then
+  input_file="$1"
+fi
+
+# delete the old output file
+rm "$output_file"
+
+
+function elapsed_time() {
+  curr_time=$(date +%s)
+  elapsed=$((curr_time - start_time))
+  echo $(date -u -d "1970-01-01 00:00:00 UTC $elapsed seconds" +"%T")
+}
+
+
+
+start_time=$(date +%s)
+counter=1
+
+
+# total number of items to do
+total_lines=$(wc -l "$input_file" | awk '{print $1}')
+
+
+# assume one protein value per line in the input file
+while read -r line
+do
+  # find the protein value and write to the outputu file
+  echo "$line,$(./extractor $line)" >> "$output_file"
+
+  # this looks like it will take a while, so show some progress...
+  if [[ $counter -eq 5 || $counter -eq 15 || $(($counter % 25)) -eq 0 ]]
+  then
+    echo "Still working... done $counter out of $total_lines in $(elapsed_time)"
+  fi
+
+  counter=$((counter + 1))
+done < "$input_file"
+
+echo "Done! Processed $((counter - 1)) items in $(elapsed_time). See $output_file"
+
